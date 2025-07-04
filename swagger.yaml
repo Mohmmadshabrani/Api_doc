@@ -1,718 +1,4075 @@
 ---
-swagger: "2.0"
+openapi: 3.1.0
 info:
-  description: "This is a sample server Petstore server.  You can find out more about\
-    \ Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).\
-    \  For this sample, you can use the api key `special-key` to test the authorization\
-    \ filters."
-  version: "1.0.5"
-  title: "Swagger Petstore"
-  termsOfService: "http://swagger.io/terms/"
-  contact:
-    email: "apiteam@swagger.io"
-  license:
-    name: "Apache 2.0"
-    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-host: "petstore.swagger.io"
-basePath: "/v2"
-tags:
-- name: "pet"
-  description: "Everything about your Pets"
-  externalDocs:
-    description: "Find out more"
-    url: "http://swagger.io"
-- name: "store"
-  description: "Access to Petstore orders"
-- name: "user"
-  description: "Operations about user"
-  externalDocs:
-    description: "Find out more about our store"
-    url: "http://swagger.io"
-schemes:
-- "https"
-- "http"
+  title: FastAPI
+  version: 0.1.0
 paths:
-  /pet/{petId}/uploadImage:
+  "/register":
     post:
-      tags:
-      - "pet"
-      summary: "uploads an image"
-      description: ""
-      operationId: "uploadFile"
-      consumes:
-      - "multipart/form-data"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "petId"
-        in: "path"
-        description: "ID of pet to update"
+      summary: Register
+      operationId: register_register_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UserRegister"
         required: true
-        type: "integer"
-        format: "int64"
-      - name: "additionalMetadata"
-        in: "formData"
-        description: "Additional data to pass to server"
-        required: false
-        type: "string"
-      - name: "file"
-        in: "formData"
-        description: "file to upload"
-        required: false
-        type: "file"
       responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/ApiResponse"
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/token":
+    post:
+      summary: Login
+      operationId: login_token_post
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              "$ref": "#/components/schemas/Body_login_token_post"
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/me":
+    get:
+      summary: Get Current User Info
+      description: Get current user information
+      operationId: get_current_user_info_me_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UserRead"
       security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-  /pet:
+      - OAuth2PasswordBearer: []
+  "/users/":
     post:
       tags:
-      - "pet"
-      summary: "Add a new pet to the store"
-      description: ""
-      operationId: "addPet"
-      consumes:
-      - "application/json"
-      - "application/xml"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "Pet object that needs to be added to the store"
+      - users
+      summary: Create User
+      operationId: create_user_users__post
+      requestBody:
         required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UserCreate"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UserRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    get:
+      tags:
+      - users
+      summary: Read Users
+      operationId: read_users_users__get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: skip
+        in: query
+        required: false
         schema:
-          $ref: "#/definitions/Pet"
+          type: integer
+          default: 0
+          title: Skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 100
+          title: Limit
       responses:
-        405:
-          description: "Invalid input"
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/UserRead"
+                title: Response Read Users Users  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/users/me":
+    get:
+      tags:
+      - users
+      summary: Read Current User
+      description: Get current user's profile
+      operationId: read_current_user_users_me_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UserRead"
       security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
+      - OAuth2PasswordBearer: []
     put:
       tags:
-      - "pet"
-      summary: "Update an existing pet"
-      description: ""
-      operationId: "updatePet"
-      consumes:
-      - "application/json"
-      - "application/xml"
-      produces:
-      - "application/json"
-      - "application/xml"
+      - users
+      summary: Update Current User
+      description: Update current user's profile
+      operationId: update_current_user_users_me_put
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UserUpdate"
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UserRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+      security:
+      - OAuth2PasswordBearer: []
+  "/users/{user_id}":
+    get:
+      tags:
+      - users
+      summary: Read User
+      operationId: read_user_users__user_id__get
+      security:
+      - OAuth2PasswordBearer: []
       parameters:
-      - in: "body"
-        name: "body"
-        description: "Pet object that needs to be added to the store"
+      - name: user_id
+        in: path
         required: true
         schema:
-          $ref: "#/definitions/Pet"
+          type: integer
+          title: User Id
       responses:
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Pet not found"
-        405:
-          description: "Validation exception"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-  /pet/findByStatus:
-    get:
-      tags:
-      - "pet"
-      summary: "Finds Pets by status"
-      description: "Multiple status values can be provided with comma separated strings"
-      operationId: "findPetsByStatus"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "status"
-        in: "query"
-        description: "Status values that need to be considered for filter"
-        required: true
-        type: "array"
-        items:
-          type: "string"
-          enum:
-          - "available"
-          - "pending"
-          - "sold"
-          default: "available"
-        collectionFormat: "multi"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/Pet"
-        400:
-          description: "Invalid status value"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-  /pet/findByTags:
-    get:
-      tags:
-      - "pet"
-      summary: "Finds Pets by tags"
-      description: "Multiple tags can be provided with comma separated strings. Use\
-        \ tag1, tag2, tag3 for testing."
-      operationId: "findPetsByTags"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "tags"
-        in: "query"
-        description: "Tags to filter by"
-        required: true
-        type: "array"
-        items:
-          type: "string"
-        collectionFormat: "multi"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/Pet"
-        400:
-          description: "Invalid tag value"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-      deprecated: true
-  /pet/{petId}:
-    get:
-      tags:
-      - "pet"
-      summary: "Find pet by ID"
-      description: "Returns a single pet"
-      operationId: "getPetById"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "petId"
-        in: "path"
-        description: "ID of pet to return"
-        required: true
-        type: "integer"
-        format: "int64"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/Pet"
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Pet not found"
-      security:
-      - api_key: []
-    post:
-      tags:
-      - "pet"
-      summary: "Updates a pet in the store with form data"
-      description: ""
-      operationId: "updatePetWithForm"
-      consumes:
-      - "application/x-www-form-urlencoded"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "petId"
-        in: "path"
-        description: "ID of pet that needs to be updated"
-        required: true
-        type: "integer"
-        format: "int64"
-      - name: "name"
-        in: "formData"
-        description: "Updated name of the pet"
-        required: false
-        type: "string"
-      - name: "status"
-        in: "formData"
-        description: "Updated status of the pet"
-        required: false
-        type: "string"
-      responses:
-        405:
-          description: "Invalid input"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-    delete:
-      tags:
-      - "pet"
-      summary: "Deletes a pet"
-      description: ""
-      operationId: "deletePet"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "api_key"
-        in: "header"
-        required: false
-        type: "string"
-      - name: "petId"
-        in: "path"
-        description: "Pet id to delete"
-        required: true
-        type: "integer"
-        format: "int64"
-      responses:
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Pet not found"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-  /store/order:
-    post:
-      tags:
-      - "store"
-      summary: "Place an order for a pet"
-      description: ""
-      operationId: "placeOrder"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "order placed for purchasing the pet"
-        required: true
-        schema:
-          $ref: "#/definitions/Order"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/Order"
-        400:
-          description: "Invalid Order"
-  /store/order/{orderId}:
-    get:
-      tags:
-      - "store"
-      summary: "Find purchase order by ID"
-      description: "For valid response try integer IDs with value >= 1 and <= 10.\
-        \ Other values will generated exceptions"
-      operationId: "getOrderById"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "orderId"
-        in: "path"
-        description: "ID of pet that needs to be fetched"
-        required: true
-        type: "integer"
-        maximum: 10
-        minimum: 1
-        format: "int64"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/Order"
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Order not found"
-    delete:
-      tags:
-      - "store"
-      summary: "Delete purchase order by ID"
-      description: "For valid response try integer IDs with positive integer value.\
-        \ Negative or non-integer values will generate API errors"
-      operationId: "deleteOrder"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "orderId"
-        in: "path"
-        description: "ID of the order that needs to be deleted"
-        required: true
-        type: "integer"
-        minimum: 1
-        format: "int64"
-      responses:
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Order not found"
-  /store/inventory:
-    get:
-      tags:
-      - "store"
-      summary: "Returns pet inventories by status"
-      description: "Returns a map of status codes to quantities"
-      operationId: "getInventory"
-      produces:
-      - "application/json"
-      parameters: []
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            type: "object"
-            additionalProperties:
-              type: "integer"
-              format: "int32"
-      security:
-      - api_key: []
-  /user/createWithArray:
-    post:
-      tags:
-      - "user"
-      summary: "Creates list of users with given input array"
-      description: ""
-      operationId: "createUsersWithArrayInput"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "List of user object"
-        required: true
-        schema:
-          type: "array"
-          items:
-            $ref: "#/definitions/User"
-      responses:
-        default:
-          description: "successful operation"
-  /user/createWithList:
-    post:
-      tags:
-      - "user"
-      summary: "Creates list of users with given input array"
-      description: ""
-      operationId: "createUsersWithListInput"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "List of user object"
-        required: true
-        schema:
-          type: "array"
-          items:
-            $ref: "#/definitions/User"
-      responses:
-        default:
-          description: "successful operation"
-  /user/{username}:
-    get:
-      tags:
-      - "user"
-      summary: "Get user by user name"
-      description: ""
-      operationId: "getUserByName"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "username"
-        in: "path"
-        description: "The name that needs to be fetched. Use user1 for testing. "
-        required: true
-        type: "string"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/User"
-        400:
-          description: "Invalid username supplied"
-        404:
-          description: "User not found"
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UserRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
     put:
       tags:
-      - "user"
-      summary: "Updated user"
-      description: "This can only be done by the logged in user."
-      operationId: "updateUser"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      - "application/xml"
+      - users
+      summary: Update User
+      operationId: update_user_users__user_id__put
+      security:
+      - OAuth2PasswordBearer: []
       parameters:
-      - name: "username"
-        in: "path"
-        description: "name that need to be updated"
-        required: true
-        type: "string"
-      - in: "body"
-        name: "body"
-        description: "Updated user object"
+      - name: user_id
+        in: path
         required: true
         schema:
-          $ref: "#/definitions/User"
+          type: integer
+          title: User Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UserCreate"
       responses:
-        400:
-          description: "Invalid user supplied"
-        404:
-          description: "User not found"
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UserRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
     delete:
       tags:
-      - "user"
-      summary: "Delete user"
-      description: "This can only be done by the logged in user."
-      operationId: "deleteUser"
-      produces:
-      - "application/json"
-      - "application/xml"
+      - users
+      summary: Delete User
+      operationId: delete_user_users__user_id__delete
       parameters:
-      - name: "username"
-        in: "path"
-        description: "The name that needs to be deleted"
-        required: true
-        type: "string"
-      responses:
-        400:
-          description: "Invalid username supplied"
-        404:
-          description: "User not found"
-  /user/login:
-    get:
-      tags:
-      - "user"
-      summary: "Logs user into the system"
-      description: ""
-      operationId: "loginUser"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "username"
-        in: "query"
-        description: "The user name for login"
-        required: true
-        type: "string"
-      - name: "password"
-        in: "query"
-        description: "The password for login in clear text"
-        required: true
-        type: "string"
-      responses:
-        200:
-          description: "successful operation"
-          headers:
-            X-Expires-After:
-              type: "string"
-              format: "date-time"
-              description: "date in UTC when token expires"
-            X-Rate-Limit:
-              type: "integer"
-              format: "int32"
-              description: "calls per hour allowed by the user"
-          schema:
-            type: "string"
-        400:
-          description: "Invalid username/password supplied"
-  /user/logout:
-    get:
-      tags:
-      - "user"
-      summary: "Logs out current logged in user session"
-      description: ""
-      operationId: "logoutUser"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters: []
-      responses:
-        default:
-          description: "successful operation"
-  /user:
-    post:
-      tags:
-      - "user"
-      summary: "Create user"
-      description: "This can only be done by the logged in user."
-      operationId: "createUser"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "Created user object"
+      - name: user_id
+        in: path
         required: true
         schema:
-          $ref: "#/definitions/User"
+          type: integer
+          title: User Id
       responses:
-        default:
-          description: "successful operation"
-securityDefinitions:
-  api_key:
-    type: "apiKey"
-    name: "api_key"
-    in: "header"
-  petstore_auth:
-    type: "oauth2"
-    authorizationUrl: "https://petstore.swagger.io/oauth/authorize"
-    flow: "implicit"
-    scopes:
-      read:pets: "read your pets"
-      write:pets: "modify pets in your account"
-definitions:
-  ApiResponse:
-    type: "object"
-    properties:
-      code:
-        type: "integer"
-        format: "int32"
-      type:
-        type: "string"
-      message:
-        type: "string"
-  Category:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      name:
-        type: "string"
-    xml:
-      name: "Category"
-  Pet:
-    type: "object"
-    required:
-    - "name"
-    - "photoUrls"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      category:
-        $ref: "#/definitions/Category"
-      name:
-        type: "string"
-        example: "doggie"
-      photoUrls:
-        type: "array"
-        xml:
-          wrapped: true
-        items:
-          type: "string"
-          xml:
-            name: "photoUrl"
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/users/upload-avatar":
+    post:
       tags:
-        type: "array"
-        xml:
-          wrapped: true
-        items:
-          xml:
-            name: "tag"
-          $ref: "#/definitions/Tag"
-      status:
-        type: "string"
-        description: "pet status in the store"
-        enum:
-        - "available"
-        - "pending"
-        - "sold"
-    xml:
-      name: "Pet"
-  Tag:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      name:
-        type: "string"
-    xml:
-      name: "Tag"
-  Order:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      petId:
-        type: "integer"
-        format: "int64"
-      quantity:
-        type: "integer"
-        format: "int32"
-      shipDate:
-        type: "string"
-        format: "date-time"
-      status:
-        type: "string"
-        description: "Order Status"
-        enum:
-        - "placed"
-        - "approved"
-        - "delivered"
-      complete:
-        type: "boolean"
-    xml:
-      name: "Order"
-  User:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      username:
-        type: "string"
-      firstName:
-        type: "string"
-      lastName:
-        type: "string"
-      email:
-        type: "string"
-      password:
-        type: "string"
-      phone:
-        type: "string"
-      userStatus:
-        type: "integer"
-        format: "int32"
-        description: "User Status"
-    xml:
-      name: "User"
-externalDocs:
-  description: "Find out more about Swagger"
-  url: "http://swagger.io"
+      - users
+      summary: Upload User Avatar
+      description: Upload avatar for the current user
+      operationId: upload_user_avatar_users_upload_avatar_post
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              "$ref": "#/components/schemas/Body_upload_user_avatar_users_upload_avatar_post"
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UserRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+      security:
+      - OAuth2PasswordBearer: []
+  "/vendors/":
+    post:
+      tags:
+      - vendors
+      summary: Create Vendor
+      operationId: create_vendor_vendors__post
+      security:
+      - OAuth2PasswordBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/VendorCreate"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/VendorRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    get:
+      tags:
+      - vendors
+      summary: Read Vendors
+      operationId: read_vendors_vendors__get
+      parameters:
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 0
+          title: Skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 100
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/VendorRead"
+                title: Response Read Vendors Vendors  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/vendors/{vendor_id}":
+    get:
+      tags:
+      - vendors
+      summary: Read Vendor
+      operationId: read_vendor_vendors__vendor_id__get
+      parameters:
+      - name: vendor_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Vendor Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/VendorRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    put:
+      tags:
+      - vendors
+      summary: Update Vendor
+      operationId: update_vendor_vendors__vendor_id__put
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: vendor_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Vendor Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/VendorCreate"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/VendorRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    delete:
+      tags:
+      - vendors
+      summary: Delete Vendor
+      operationId: delete_vendor_vendors__vendor_id__delete
+      parameters:
+      - name: vendor_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Vendor Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/categories/":
+    get:
+      tags:
+      - categories
+      summary: Get All Categories
+      operationId: get_all_categories_categories__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  "$ref": "#/components/schemas/CategoryRead"
+                type: array
+                title: Response Get All Categories Categories  Get
+  "/categories/{category_id}":
+    get:
+      tags:
+      - categories
+      summary: Get Category By Id
+      description: Get a specific category by ID
+      operationId: get_category_by_id_categories__category_id__get
+      parameters:
+      - name: category_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Category Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CategoryRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/categories/{category_id}/products":
+    get:
+      tags:
+      - categories
+      summary: Get Products By Category
+      description: Get products (tires) in a specific category grouped by brand
+      operationId: get_products_by_category_categories__category_id__products_get
+      parameters:
+      - name: category_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Category Id
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Number of records to skip
+          default: 0
+          title: Skip
+        description: Number of records to skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 1
+          description: Maximum number of records to return
+          default: 100
+          title: Limit
+        description: Maximum number of records to return
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/admin/categories/":
+    post:
+      tags:
+      - admin-categories
+      summary: Create Category
+      operationId: create_category_admin_categories__post
+      security:
+      - OAuth2PasswordBearer: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              "$ref": "#/components/schemas/Body_create_category_admin_categories__post"
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CategoryRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    get:
+      tags:
+      - admin-categories
+      summary: Get All Categories Admin
+      description: Get all categories with admin privileges - supports pagination,
+        filtering, and search
+      operationId: get_all_categories_admin_admin_categories__get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          description: Page number (1-based)
+          default: 1
+          title: Page
+        description: Page number (1-based)
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          description: Items per page
+          default: 20
+          title: Limit
+        description: Items per page
+      - name: status
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by status
+          title: Status
+        description: Filter by status
+      - name: search
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Search categories by name
+          title: Search
+        description: Search categories by name
+      - name: include_deleted
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Include soft-deleted categories
+          default: false
+          title: Include Deleted
+        description: Include soft-deleted categories
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/CategoryRead"
+                title: Response Get All Categories Admin Admin Categories  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/admin/categories/{category_id}":
+    get:
+      tags:
+      - admin-categories
+      summary: Get Category By Id Admin
+      description: Get a specific category by ID - Admin only (includes inactive categories)
+      operationId: get_category_by_id_admin_admin_categories__category_id__get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: category_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Category Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CategoryRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    put:
+      tags:
+      - admin-categories
+      summary: Update Category
+      description: Update an existing category - Admin only
+      operationId: update_category_admin_categories__category_id__put
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: category_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Category Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CategoryUpdate"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CategoryRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    delete:
+      tags:
+      - admin-categories
+      summary: Delete Category
+      description: Soft delete a category - Admin only
+      operationId: delete_category_admin_categories__category_id__delete
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: category_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Category Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/admin/categories/{category_id}/toggle-status":
+    patch:
+      tags:
+      - admin-categories
+      summary: Toggle Category Status
+      description: Toggle category active/inactive status - Admin only
+      operationId: toggle_category_status_admin_categories__category_id__toggle_status_patch
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: category_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Category Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/admin/categories/{category_id}/products":
+    post:
+      tags:
+      - admin-categories
+      summary: Add Product To Category
+      description: Add a product to a category - Admin only
+      operationId: add_product_to_category_admin_categories__category_id__products_post
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: category_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Category Id
+      - name: productable_type
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Type of product (e.g., 'tire')
+          title: Productable Type
+        description: Type of product (e.g., 'tire')
+      - name: productable_id
+        in: query
+        required: true
+        schema:
+          type: integer
+          description: ID of the product
+          title: Productable Id
+        description: ID of the product
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/admin/categories/{category_id}/products/{product_id}":
+    delete:
+      tags:
+      - admin-categories
+      summary: Remove Product From Category
+      description: Remove a product from a category - Admin only
+      operationId: remove_product_from_category_admin_categories__category_id__products__product_id__delete
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: category_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Category Id
+      - name: product_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Product Id
+      - name: productable_type
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Type of product (e.g., 'tire')
+          title: Productable Type
+        description: Type of product (e.g., 'tire')
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/admin/categories/{category_id}/products/admin":
+    get:
+      tags:
+      - admin-categories
+      summary: Get Category Products Admin
+      description: Get all products in a category with admin details - Admin only
+      operationId: get_category_products_admin_admin_categories__category_id__products_admin_get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: category_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Category Id
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Number of records to skip
+          default: 0
+          title: Skip
+        description: Number of records to skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 1
+          description: Maximum number of records to return
+          default: 100
+          title: Limit
+        description: Maximum number of records to return
+      - name: productable_type
+        in: query
+        required: false
+        schema:
+          type: string
+          description: Filter by product type
+          title: Productable Type
+        description: Filter by product type
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/admin/categories/{category_id}/status":
+    patch:
+      tags:
+      - admin-categories
+      summary: Update Category Status
+      description: Update category status - Admin only
+      operationId: update_category_status_admin_categories__category_id__status_patch
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: category_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Category Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/StatusUpdateRequest"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CategoryRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/admin/categories/search":
+    get:
+      tags:
+      - admin-categories
+      summary: Search Categories
+      description: Search categories - Admin only
+      operationId: search_categories_admin_categories_search_get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: query
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Search query
+          title: Query
+        description: Search query
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          description: Page number
+          default: 1
+          title: Page
+        description: Page number
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          description: Items per page
+          default: 20
+          title: Limit
+        description: Items per page
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/CategoryRead"
+                title: Response Search Categories Admin Categories Search Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/admin/categories/upload-image":
+    post:
+      tags:
+      - admin-categories
+      summary: Upload Image
+      description: Upload an image to the CDN - Admin only
+      operationId: upload_image_admin_categories_upload_image_post
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              "$ref": "#/components/schemas/Body_upload_image_admin_categories_upload_image_post"
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Upload Image Admin Categories Upload Image Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+      security:
+      - OAuth2PasswordBearer: []
+  "/shops/":
+    post:
+      tags:
+      - shops
+      summary: Create Shop
+      operationId: create_shop_shops__post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ShopCreate"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ShopRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    get:
+      tags:
+      - shops
+      summary: Read Shops
+      operationId: read_shops_shops__get
+      parameters:
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 0
+          title: Skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 100
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/ShopRead"
+                title: Response Read Shops Shops  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/shops/{shop_id}":
+    get:
+      tags:
+      - shops
+      summary: Read Shop
+      operationId: read_shop_shops__shop_id__get
+      parameters:
+      - name: shop_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Shop Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ShopRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    put:
+      tags:
+      - shops
+      summary: Update Shop
+      operationId: update_shop_shops__shop_id__put
+      parameters:
+      - name: shop_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Shop Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ShopCreate"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ShopRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    delete:
+      tags:
+      - shops
+      summary: Delete Shop
+      operationId: delete_shop_shops__shop_id__delete
+      parameters:
+      - name: shop_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Shop Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/products/":
+    get:
+      tags:
+      - products
+      summary: Get All Products
+      description: Get all products with pagination
+      operationId: get_all_products_products__get
+      parameters:
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Number of records to skip
+          default: 0
+          title: Skip
+        description: Number of records to skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 1
+          description: Maximum number of records to return
+          default: 100
+          title: Limit
+        description: Maximum number of records to return
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/ProductRead"
+                title: Response Get All Products Products  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    post:
+      tags:
+      - products
+      summary: Create Product
+      description: Create a new tire product - requires authentication
+      operationId: create_product_products__post
+      security:
+      - OAuth2PasswordBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ProductCreate"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ProductRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/products/by-brand/{brand_name}":
+    get:
+      tags:
+      - products
+      summary: Get Products By Brand
+      description: Get products by brand name (for tire products)
+      operationId: get_products_by_brand_products_by_brand__brand_name__get
+      parameters:
+      - name: brand_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Brand Name
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Number of records to skip
+          default: 0
+          title: Skip
+        description: Number of records to skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 1
+          description: Maximum number of records to return
+          default: 100
+          title: Limit
+        description: Maximum number of records to return
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/ProductRead"
+                title: Response Get Products By Brand Products By Brand  Brand Name  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/products/by-category/{category_id}":
+    get:
+      tags:
+      - products
+      summary: Get Products By Category
+      description: Get products by category ID
+      operationId: get_products_by_category_products_by_category__category_id__get
+      parameters:
+      - name: category_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Category Id
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Number of records to skip
+          default: 0
+          title: Skip
+        description: Number of records to skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 1
+          description: Maximum number of records to return
+          default: 100
+          title: Limit
+        description: Maximum number of records to return
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/ProductRead"
+                title: Response Get Products By Category Products By Category  Category
+                  Id  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/products/by-vendor/{vendor_id}":
+    get:
+      tags:
+      - products
+      summary: Get Products By Vendor
+      description: Get products by vendor ID
+      operationId: get_products_by_vendor_products_by_vendor__vendor_id__get
+      parameters:
+      - name: vendor_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Vendor Id
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Number of records to skip
+          default: 0
+          title: Skip
+        description: Number of records to skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 1
+          description: Maximum number of records to return
+          default: 100
+          title: Limit
+        description: Maximum number of records to return
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/ProductRead"
+                title: Response Get Products By Vendor Products By Vendor  Vendor
+                  Id  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/products/{product_id}/details":
+    get:
+      tags:
+      - products
+      summary: Get Product Details
+      description: Get a single product by ID with all related information
+      operationId: get_product_details_products__product_id__details_get
+      parameters:
+      - name: product_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Product Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ProductDetailResponse"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/products/{product_id}":
+    put:
+      tags:
+      - products
+      summary: Update Product
+      description: Update an existing tire product - requires authentication
+      operationId: update_product_products__product_id__put
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: product_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Product Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ProductCreate"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ProductRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    delete:
+      tags:
+      - products
+      summary: Delete Product
+      description: Delete a tire product - requires admin privileges
+      operationId: delete_product_products__product_id__delete
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: product_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Product Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/products/search":
+    get:
+      tags:
+      - products
+      summary: Search Products
+      description: Search products by model, description, or brand name
+      operationId: search_products_products_search_get
+      parameters:
+      - name: q
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          description: Search query for product model, description, or brand
+          title: Q
+        description: Search query for product model, description, or brand
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Number of records to skip
+          default: 0
+          title: Skip
+        description: Number of records to skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 1
+          description: Maximum number of records to return
+          default: 100
+          title: Limit
+        description: Maximum number of records to return
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/ProductRead"
+                title: Response Search Products Products Search Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/products/by-size":
+    get:
+      tags:
+      - products
+      summary: Get Products By Size
+      description: Search products by tire size (width/ratio/rim)
+      operationId: get_products_by_size_products_by_size_get
+      parameters:
+      - name: width
+        in: query
+        required: true
+        schema:
+          type: integer
+          description: Tire width
+          title: Width
+        description: Tire width
+      - name: ratio
+        in: query
+        required: true
+        schema:
+          type: integer
+          description: Tire aspect ratio
+          title: Ratio
+        description: Tire aspect ratio
+      - name: rim
+        in: query
+        required: true
+        schema:
+          type: integer
+          description: Rim diameter
+          title: Rim
+        description: Rim diameter
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Number of records to skip
+          default: 0
+          title: Skip
+        description: Number of records to skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 1
+          description: Maximum number of records to return
+          default: 100
+          title: Limit
+        description: Maximum number of records to return
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/ProductRead"
+                title: Response Get Products By Size Products By Size Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/products/brands-for-vehicle":
+    get:
+      tags:
+      - products
+      summary: Get Brands For Vehicle
+      description: Get all tire brands with tires compatible with a specific vehicle,
+        grouped by brand.
+      operationId: get_brands_for_vehicle_products_brands_for_vehicle_get
+      parameters:
+      - name: make
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Vehicle make
+          title: Make
+        description: Vehicle make
+      - name: model
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Vehicle model
+          title: Model
+        description: Vehicle model
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Number of records to skip
+          default: 0
+          title: Skip
+        description: Number of records to skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 1
+          description: Maximum number of records to return
+          default: 100
+          title: Limit
+        description: Maximum number of records to return
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/products/for-vehicle":
+    get:
+      tags:
+      - products
+      summary: Get Products For Vehicle
+      description: Get tire products that are compatible with a specific vehicle
+      operationId: get_products_for_vehicle_products_for_vehicle_get
+      parameters:
+      - name: make
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Vehicle make
+          title: Make
+        description: Vehicle make
+      - name: model
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Vehicle model
+          title: Model
+        description: Vehicle model
+      - name: brand
+        in: query
+        required: false
+        schema:
+          type: string
+          description: Filter by brand name (optional)
+          title: Brand
+        description: Filter by brand name (optional)
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Number of records to skip
+          default: 0
+          title: Skip
+        description: Number of records to skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 1
+          description: Maximum number of records to return
+          default: 100
+          title: Limit
+        description: Maximum number of records to return
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/ProductRead"
+                title: Response Get Products For Vehicle Products For Vehicle Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/products/brands-for-size":
+    get:
+      tags:
+      - products
+      summary: Get Brands For Size
+      description: Get all tire brands that have products with a specific tire size,
+        grouped by brand.
+      operationId: get_brands_for_size_products_brands_for_size_get
+      parameters:
+      - name: width
+        in: query
+        required: true
+        schema:
+          type: integer
+          description: Tire width
+          title: Width
+        description: Tire width
+      - name: ratio
+        in: query
+        required: true
+        schema:
+          type: integer
+          description: Tire aspect ratio
+          title: Ratio
+        description: Tire aspect ratio
+      - name: rim
+        in: query
+        required: true
+        schema:
+          type: integer
+          description: Rim diameter
+          title: Rim
+        description: Rim diameter
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Number of records to skip
+          default: 0
+          title: Skip
+        description: Number of records to skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 1
+          description: Maximum number of records to return
+          default: 100
+          title: Limit
+        description: Maximum number of records to return
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/product-images/{image_id}":
+    delete:
+      tags:
+      - Product Images
+      summary: Delete Product Image
+      operationId: delete_product_image_product_images__image_id__delete
+      parameters:
+      - name: image_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Image Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/product-images/upload":
+    post:
+      tags:
+      - Product Images
+      summary: Upload Product Image
+      operationId: upload_product_image_product_images_upload_post
+      parameters:
+      - name: product_id
+        in: query
+        required: true
+        schema:
+          type: integer
+          title: Product Id
+      - name: is_primary
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Is Primary
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              "$ref": "#/components/schemas/Body_upload_product_image_product_images_upload_post"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/brands/":
+    get:
+      tags:
+      - brands
+      summary: Get All Brands
+      description: Get all tire brands, ordered by the number of tires available (descending)
+      operationId: get_all_brands_brands__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  "/brands/recommended":
+    get:
+      tags:
+      - brands
+      summary: Get Top Brands
+      description: |-
+        Get top 4 tire brands based on the number of tire products.
+        Returns brand info along with their tire details.
+      operationId: get_top_brands_brands_recommended_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  "/brands/{brand_name}/tire-sizes":
+    get:
+      tags:
+      - brands
+      summary: Get Tire Sizes By Brand Detailed
+      description: Get all tire sizes available for a specific brand
+      operationId: get_tire_sizes_by_brand_detailed_brands__brand_name__tire_sizes_get
+      parameters:
+      - name: brand_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Brand Name
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/cart/":
+    get:
+      tags:
+      - cart
+      summary: Get Cart
+      description: Get user's cart with all items. Supports both authenticated and
+        guest users.
+      operationId: get_cart_cart__get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: session_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Session ID for guest users
+          title: Session Id
+        description: Session ID for guest users
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CartWithItems"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/cart/items":
+    post:
+      tags:
+      - cart
+      summary: Add To Cart
+      description: Add an item to cart. Creates cart if it doesn't exist.
+      operationId: add_to_cart_cart_items_post
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: session_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Session ID for guest users
+          title: Session Id
+        description: Session ID for guest users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CartItemCreate"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CartItemRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/cart/items/{cart_item_id}":
+    put:
+      tags:
+      - cart
+      summary: Update Cart Item
+      description: Update quantity of a cart item.
+      operationId: update_cart_item_cart_items__cart_item_id__put
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: cart_item_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Cart Item Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CartItemUpdate"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CartItemRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    delete:
+      tags:
+      - cart
+      summary: Remove From Cart
+      description: Remove an item from cart.
+      operationId: remove_from_cart_cart_items__cart_item_id__delete
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: cart_item_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Cart Item Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/cart/clear":
+    delete:
+      tags:
+      - cart
+      summary: Clear Cart
+      description: Clear all items from cart.
+      operationId: clear_cart_cart_clear_delete
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: session_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Session ID for guest users
+          title: Session Id
+        description: Session ID for guest users
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/cart/summary":
+    get:
+      tags:
+      - cart
+      summary: Get Cart Summary
+      description: Get cart summary (total items, total amount, items count).
+      operationId: get_cart_summary_cart_summary_get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: session_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Session ID for guest users
+          title: Session Id
+        description: Session ID for guest users
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CartSummary"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/cart/merge":
+    post:
+      tags:
+      - cart
+      summary: Merge Guest Cart To User
+      description: Merge guest cart with user cart when user logs in.
+      operationId: merge_guest_cart_to_user_cart_merge_post
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: session_id
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Session Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/orders/":
+    post:
+      tags:
+      - orders
+      summary: Create Order
+      description: Create a new order with backend-calculated prices for security
+      operationId: create_order_orders__post
+      security:
+      - OAuth2PasswordBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/OrderCreate"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/OrderRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    get:
+      tags:
+      - orders
+      summary: Get Orders
+      description: Get orders for the current user
+      operationId: get_orders_orders__get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 0
+          title: Skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 100
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/orders/{order_id}":
+    get:
+      tags:
+      - orders
+      summary: Get Order
+      description: Get a specific order by ID
+      operationId: get_order_orders__order_id__get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Order Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    put:
+      tags:
+      - orders
+      summary: Update Order
+      description: Update order details
+      operationId: update_order_orders__order_id__put
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Order Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/OrderUpdate"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/OrderRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/orders/{order_id}/status":
+    put:
+      tags:
+      - orders
+      summary: Update Order Status
+      description: Update order status
+      operationId: update_order_status_orders__order_id__status_put
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Order Id
+      - name: status
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Status
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/orders/{order_id}/payment-status":
+    put:
+      tags:
+      - orders
+      summary: Update Payment Status
+      description: Update payment status
+      operationId: update_payment_status_orders__order_id__payment_status_put
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Order Id
+      - name: payment_status
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Payment Status
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/orders/test":
+    post:
+      tags:
+      - orders
+      summary: Create Order Test
+      description: Create a new order (test endpoint without authentication)
+      operationId: create_order_test_orders_test_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/OrderCreate"
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/OrderRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/orders/{order_id}/cancel":
+    put:
+      tags:
+      - orders
+      summary: Cancel Order
+      description: Cancel an order
+      operationId: cancel_order_orders__order_id__cancel_put
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Order Id
+      - name: cancellation_reason
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Cancellation Reason
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/vehicles/makes":
+    get:
+      tags:
+      - vehicles
+      summary: Get Vehicle Makes
+      description: Get all unique vehicle makes
+      operationId: get_vehicle_makes_vehicles_makes_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  type: string
+                type: array
+                title: Response Get Vehicle Makes Vehicles Makes Get
+  "/vehicles/makes/{make}/models":
+    get:
+      tags:
+      - vehicles
+      summary: Get Vehicle Models
+      description: Get all models for a specific make
+      operationId: get_vehicle_models_vehicles_makes__make__models_get
+      parameters:
+      - name: make
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Make
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                title: Response Get Vehicle Models Vehicles Makes  Make  Models Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/vehicles/makes/{make}/models/{model}/sizes":
+    get:
+      tags:
+      - vehicles
+      summary: Get Vehicle Sizes
+      description: Get all tire sizes for a specific make and model
+      operationId: get_vehicle_sizes_vehicles_makes__make__models__model__sizes_get
+      parameters:
+      - name: make
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Make
+      - name: model
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Model
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/SizeResponse"
+                title: Response Get Vehicle Sizes Vehicles Makes  Make  Models  Model  Sizes
+                  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/vehicles/search":
+    get:
+      tags:
+      - vehicles
+      summary: Search Vehicles
+      description: Search vehicles by make and/or model with their tire sizes
+      operationId: search_vehicles_vehicles_search_get
+      parameters:
+      - name: make
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Make
+      - name: model
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Model
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/VehicleSize"
+                title: Response Search Vehicles Vehicles Search Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/sizes/":
+    get:
+      tags:
+      - sizes
+      summary: Get All Sizes
+      description: Get all available tire sizes with pagination
+      operationId: get_all_sizes_sizes__get
+      parameters:
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Number of records to skip
+          default: 0
+          title: Skip
+        description: Number of records to skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 1
+          description: Maximum number of records to return
+          default: 1000
+          title: Limit
+        description: Maximum number of records to return
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/SizeRead"
+                title: Response Get All Sizes Sizes  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/sizes/widths":
+    get:
+      tags:
+      - sizes
+      summary: Get Unique Widths
+      description: Get all unique tire widths
+      operationId: get_unique_widths_sizes_widths_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  type: integer
+                type: array
+                title: Response Get Unique Widths Sizes Widths Get
+  "/sizes/heights":
+    get:
+      tags:
+      - sizes
+      summary: Get Unique Heights
+      description: Get all unique tire heights
+      operationId: get_unique_heights_sizes_heights_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  type: integer
+                type: array
+                title: Response Get Unique Heights Sizes Heights Get
+  "/sizes/rim-sizes":
+    get:
+      tags:
+      - sizes
+      summary: Get Unique Rim Sizes
+      description: Get all unique rim sizes
+      operationId: get_unique_rim_sizes_sizes_rim_sizes_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  type: integer
+                type: array
+                title: Response Get Unique Rim Sizes Sizes Rim Sizes Get
+  "/sizes/filtered":
+    get:
+      tags:
+      - sizes
+      summary: Get Filtered Sizes
+      description: |-
+        Get filtered tire sizes based on width, height, and/or rim size parameters.
+        Returns available options for each dimension based on current filters.
+      operationId: get_filtered_sizes_sizes_filtered_get
+      parameters:
+      - name: width
+        in: query
+        required: false
+        schema:
+          type: integer
+          description: Filter by tire width
+          title: Width
+        description: Filter by tire width
+      - name: height
+        in: query
+        required: false
+        schema:
+          type: integer
+          description: Filter by tire height
+          title: Height
+        description: Filter by tire height
+      - name: rim_size
+        in: query
+        required: false
+        schema:
+          type: integer
+          description: Filter by rim size
+          title: Rim Size
+        description: Filter by rim size
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/sizes/{size_id}":
+    get:
+      tags:
+      - sizes
+      summary: Get Size By Id
+      description: Get a specific tire size by ID
+      operationId: get_size_by_id_sizes__size_id__get
+      parameters:
+      - name: size_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Size Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/SizeRead"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+components:
+  schemas:
+    Body_create_category_admin_categories__post:
+      properties:
+        name:
+          type: string
+          title: Name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        file:
+          anyOf:
+          - type: string
+            format: binary
+          - type: 'null'
+          title: File
+      type: object
+      required:
+      - name
+      title: Body_create_category_admin_categories__post
+    Body_login_token_post:
+      properties:
+        grant_type:
+          anyOf:
+          - type: string
+            pattern: "^password$"
+          - type: 'null'
+          title: Grant Type
+        username:
+          type: string
+          title: Username
+        password:
+          type: string
+          title: Password
+        scope:
+          type: string
+          title: Scope
+          default: ''
+        client_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Client Id
+        client_secret:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Client Secret
+      type: object
+      required:
+      - username
+      - password
+      title: Body_login_token_post
+    Body_upload_image_admin_categories_upload_image_post:
+      properties:
+        file:
+          type: string
+          format: binary
+          title: File
+        category_id:
+          type: integer
+          title: Category Id
+          description: ID of the category to upload image for
+      type: object
+      required:
+      - file
+      - category_id
+      title: Body_upload_image_admin_categories_upload_image_post
+    Body_upload_product_image_product_images_upload_post:
+      properties:
+        file:
+          type: string
+          format: binary
+          title: File
+      type: object
+      required:
+      - file
+      title: Body_upload_product_image_product_images_upload_post
+    Body_upload_user_avatar_users_upload_avatar_post:
+      properties:
+        file:
+          type: string
+          format: binary
+          title: File
+      type: object
+      required:
+      - file
+      title: Body_upload_user_avatar_users_upload_avatar_post
+    CartItemCreate:
+      properties:
+        product_id:
+          type: integer
+          title: Product Id
+        quantity:
+          type: integer
+          exclusiveMinimum: 0
+          title: Quantity
+          description: Quantity must be greater than 0
+        product_type:
+          type: string
+          title: Product Type
+          description: Type of product (tire, accessory, etc.)
+          default: tire
+      type: object
+      required:
+      - product_id
+      - quantity
+      title: CartItemCreate
+    CartItemRead:
+      properties:
+        cart_item_id:
+          type: integer
+          title: Cart Item Id
+        cart_id:
+          type: integer
+          title: Cart Id
+        productable_id:
+          type: integer
+          title: Productable Id
+        quantity:
+          type: integer
+          title: Quantity
+        unit_price:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Unit Price
+        added_at:
+          type: string
+          format: date-time
+          title: Added At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      type: object
+      required:
+      - cart_item_id
+      - cart_id
+      - productable_id
+      - quantity
+      - added_at
+      - updated_at
+      title: CartItemRead
+    CartItemUpdate:
+      properties:
+        quantity:
+          type: integer
+          exclusiveMinimum: 0
+          title: Quantity
+          description: Quantity must be greater than 0
+      type: object
+      required:
+      - quantity
+      title: CartItemUpdate
+    CartItemWithProduct:
+      properties:
+        cart_item_id:
+          type: integer
+          title: Cart Item Id
+        cart_id:
+          type: integer
+          title: Cart Id
+        productable_id:
+          type: integer
+          title: Productable Id
+        quantity:
+          type: integer
+          title: Quantity
+        unit_price:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Unit Price
+        added_at:
+          type: string
+          format: date-time
+          title: Added At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+        product:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Product
+        product_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Product Name
+        total_price:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Total Price
+      type: object
+      required:
+      - cart_item_id
+      - cart_id
+      - productable_id
+      - quantity
+      - added_at
+      - updated_at
+      title: CartItemWithProduct
+    CartSummary:
+      properties:
+        total_items:
+          type: integer
+          title: Total Items
+        total_amount:
+          type: string
+          title: Total Amount
+        cart_items_count:
+          type: integer
+          title: Cart Items Count
+      type: object
+      required:
+      - total_items
+      - total_amount
+      - cart_items_count
+      title: CartSummary
+    CartWithItems:
+      properties:
+        cart_id:
+          type: integer
+          title: Cart Id
+        user_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: User Id
+        session_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Session Id
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+        cart_items:
+          items:
+            "$ref": "#/components/schemas/CartItemWithProduct"
+          type: array
+          title: Cart Items
+          default: []
+        total_items:
+          type: integer
+          title: Total Items
+          default: 0
+        total_amount:
+          type: string
+          title: Total Amount
+          default: '0.00'
+        is_empty:
+          type: boolean
+          title: Is Empty
+          default: true
+      type: object
+      required:
+      - cart_id
+      - created_at
+      - updated_at
+      title: CartWithItems
+    CategoryRead:
+      properties:
+        id:
+          type: integer
+          title: Id
+        name:
+          type: string
+          title: Name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+          default: ''
+        image:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Image
+        is_active:
+          type: integer
+          title: Is Active
+          default: 1
+        products_count:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Products Count
+          default: 0
+        created_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Created At
+        updated_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Updated At
+        deleted_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Deleted At
+      type: object
+      required:
+      - id
+      - name
+      title: CategoryRead
+    CategoryUpdate:
+      properties:
+        name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        image:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Image
+        is_active:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Is Active
+      type: object
+      title: CategoryUpdate
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            "$ref": "#/components/schemas/ValidationError"
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    OrderCreate:
+      properties:
+        user_id:
+          type: integer
+          title: User Id
+        coupon_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Coupon Id
+        status:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Status
+          default: pending
+        total_amount:
+          type: number
+          title: Total Amount
+        payment_method:
+          type: string
+          title: Payment Method
+        payment_status:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Payment Status
+          default: pending
+        order_items:
+          items:
+            "$ref": "#/components/schemas/OrderItemCreate"
+          type: array
+          title: Order Items
+        discount_amount:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Discount Amount
+        discount_type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Discount Type
+        cancellation_reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cancellation Reason
+        notes:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Notes
+        paid_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Paid At
+        original_amount:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Original Amount
+      type: object
+      required:
+      - user_id
+      - total_amount
+      - payment_method
+      - order_items
+      title: OrderCreate
+    OrderItemCreate:
+      properties:
+        productable_type:
+          type: string
+          title: Productable Type
+        productable_id:
+          type: integer
+          title: Productable Id
+        quantity:
+          type: integer
+          title: Quantity
+        unit_price:
+          type: number
+          title: Unit Price
+        total_price:
+          type: number
+          title: Total Price
+      type: object
+      required:
+      - productable_type
+      - productable_id
+      - quantity
+      - unit_price
+      - total_price
+      title: OrderItemCreate
+    OrderItemRead:
+      properties:
+        id:
+          type: integer
+          title: Id
+        order_id:
+          type: integer
+          title: Order Id
+        productable_type:
+          type: string
+          title: Productable Type
+        productable_id:
+          type: integer
+          title: Productable Id
+        quantity:
+          type: integer
+          title: Quantity
+        unit_price:
+          type: number
+          title: Unit Price
+        total_price:
+          type: number
+          title: Total Price
+        product_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Product Name
+        product_image:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Product Image
+        brand_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Brand Name
+        size:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Size
+      type: object
+      required:
+      - id
+      - order_id
+      - productable_type
+      - productable_id
+      - quantity
+      - unit_price
+      - total_price
+      title: OrderItemRead
+    OrderRead:
+      properties:
+        order_id:
+          type: integer
+          title: Order Id
+        user_id:
+          type: integer
+          title: User Id
+        coupon_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Coupon Id
+        created_by:
+          type: integer
+          title: Created By
+        status:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Status
+        total_amount:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Total Amount
+        payment_method:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Payment Method
+        payment_status:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Payment Status
+        ordered_at:
+          type: string
+          format: date-time
+          title: Ordered At
+        order_items:
+          items:
+            "$ref": "#/components/schemas/OrderItemRead"
+          type: array
+          title: Order Items
+        discount_amount:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Discount Amount
+        discount_type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Discount Type
+        cancellation_reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cancellation Reason
+        notes:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Notes
+        paid_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Paid At
+        original_amount:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Original Amount
+      type: object
+      required:
+      - order_id
+      - user_id
+      - coupon_id
+      - created_by
+      - ordered_at
+      - order_items
+      title: OrderRead
+    OrderUpdate:
+      properties:
+        status:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Status
+        payment_status:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Payment Status
+        payment_method:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Payment Method
+        discount_amount:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Discount Amount
+        discount_type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Discount Type
+        cancellation_reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cancellation Reason
+        notes:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Notes
+        paid_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Paid At
+      type: object
+      title: OrderUpdate
+    ProductCreate:
+      properties:
+        vendor_id:
+          type: integer
+          title: Vendor Id
+        size_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Size Id
+        brand_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Brand Id
+        model:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Model
+          default: Unknown
+        manufacture_date:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Manufacture Date
+        season_type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Season Type
+          default: all_season
+        tread_pattern:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Tread Pattern
+        load_index:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Load Index
+        speed_rating:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Speed Rating
+        price:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Price
+        discount_percentage:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Discount Percentage
+          default: 0
+        condition:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Condition
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        stock_quantity:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Stock Quantity
+          default: 0
+        stock_status:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Stock Status
+          default: in_stock
+        is_active:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Is Active
+          default: active
+      type: object
+      required:
+      - vendor_id
+      title: ProductCreate
+    ProductDetailResponse:
+      properties:
+        product_id:
+          type: integer
+          title: Product Id
+        vendor_id:
+          type: integer
+          title: Vendor Id
+        discount_percentage:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Discount Percentage
+        price:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Price
+        condition:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Condition
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        stock_status:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Stock Status
+        stock_quantity:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Stock Quantity
+        model:
+          type: string
+          title: Model
+        season_type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Season Type
+        tread_pattern:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Tread Pattern
+        load_index:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Load Index
+        speed_rating:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Speed Rating
+        is_active:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Is Active
+        manufacture_date:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Manufacture Date
+        vendor:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Vendor
+        categories:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          title: Categories
+          default: []
+        images:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          title: Images
+          default: []
+        size:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Size
+        brand:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Brand
+      type: object
+      required:
+      - product_id
+      - vendor_id
+      - model
+      title: ProductDetailResponse
+    ProductRead:
+      properties:
+        tire_id:
+          type: integer
+          title: Tire Id
+        vendor_id:
+          type: integer
+          title: Vendor Id
+        size_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Size Id
+        brand_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Brand Id
+        model:
+          type: string
+          title: Model
+        manufacture_date:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Manufacture Date
+        season_type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Season Type
+        tread_pattern:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Tread Pattern
+        load_index:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Load Index
+        speed_rating:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Speed Rating
+        price:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Price
+        discount_percentage:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Discount Percentage
+        condition:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Condition
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        stock_quantity:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Stock Quantity
+        stock_status:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Stock Status
+        is_active:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Is Active
+      type: object
+      required:
+      - tire_id
+      - vendor_id
+      - model
+      title: ProductRead
+    RoleRead:
+      properties:
+        id:
+          type: integer
+          title: Id
+        name:
+          type: string
+          title: Name
+      type: object
+      required:
+      - id
+      - name
+      title: RoleRead
+    ShopCreate:
+      properties:
+        vendor_id:
+          type: integer
+          title: Vendor Id
+        manager_user_id:
+          type: integer
+          title: Manager User Id
+        address:
+          type: string
+          title: Address
+        city:
+          type: string
+          title: City
+        region:
+          type: string
+          title: Region
+        contact_number:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Contact Number
+        opening_hours:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Opening Hours
+      type: object
+      required:
+      - vendor_id
+      - manager_user_id
+      - address
+      - city
+      - region
+      title: ShopCreate
+    ShopRead:
+      properties:
+        shop_id:
+          type: integer
+          title: Shop Id
+        vendor_id:
+          type: integer
+          title: Vendor Id
+        manager_user_id:
+          type: integer
+          title: Manager User Id
+        address:
+          type: string
+          title: Address
+        city:
+          type: string
+          title: City
+        region:
+          type: string
+          title: Region
+        contact_number:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Contact Number
+        opening_hours:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Opening Hours
+      type: object
+      required:
+      - shop_id
+      - vendor_id
+      - manager_user_id
+      - address
+      - city
+      - region
+      title: ShopRead
+    SizeRead:
+      properties:
+        size_id:
+          type: integer
+          title: Size Id
+        width:
+          type: integer
+          title: Width
+        height:
+          type: integer
+          title: Height
+        rim_size:
+          type: integer
+          title: Rim Size
+      type: object
+      required:
+      - size_id
+      - width
+      - height
+      - rim_size
+      title: SizeRead
+    SizeResponse:
+      properties:
+        size_id:
+          type: integer
+          title: Size Id
+        width:
+          type: integer
+          title: Width
+        height:
+          type: integer
+          title: Height
+        rim_size:
+          type: integer
+          title: Rim Size
+        position:
+          type: string
+          title: Position
+      type: object
+      required:
+      - size_id
+      - width
+      - height
+      - rim_size
+      - position
+      title: SizeResponse
+    StatusUpdateRequest:
+      properties:
+        ids:
+          items:
+            type: string
+          type: array
+          title: Ids
+        status:
+          type: string
+          title: Status
+      type: object
+      required:
+      - ids
+      - status
+      title: StatusUpdateRequest
+    UserCreate:
+      properties:
+        name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Name
+        email:
+          type: string
+          title: Email
+        phone:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Phone
+        password:
+          type: string
+          title: Password
+        image:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Image
+        is_active:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Is Active
+          default: 1
+        oauth_provider:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Oauth Provider
+        oauth_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Oauth Id
+      type: object
+      required:
+      - name
+      - email
+      - phone
+      - password
+      title: UserCreate
+    UserRead:
+      properties:
+        id:
+          type: integer
+          title: Id
+        name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Name
+        email:
+          type: string
+          title: Email
+        phone:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Phone
+        image:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Image
+        is_active:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Is Active
+        oauth_provider:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Oauth Provider
+        oauth_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Oauth Id
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        roles:
+          anyOf:
+          - items:
+              "$ref": "#/components/schemas/RoleRead"
+            type: array
+          - type: 'null'
+          title: Roles
+      type: object
+      required:
+      - id
+      - name
+      - email
+      - phone
+      - is_active
+      - oauth_provider
+      - oauth_id
+      - created_at
+      title: UserRead
+    UserRegister:
+      properties:
+        first_name:
+          type: string
+          title: First Name
+        last_name:
+          type: string
+          title: Last Name
+        email:
+          type: string
+          format: email
+          title: Email
+        phone:
+          type: string
+          title: Phone
+        password:
+          type: string
+          title: Password
+        image:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Image
+        is_active:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Is Active
+          default: 1
+      type: object
+      required:
+      - first_name
+      - last_name
+      - email
+      - phone
+      - password
+      title: UserRegister
+    UserUpdate:
+      properties:
+        name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Name
+        email:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Email
+        phone:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Phone
+        image:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Image
+        is_active:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Is Active
+      type: object
+      title: UserUpdate
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    VehicleSize:
+      properties:
+        vehicle_id:
+          type: integer
+          title: Vehicle Id
+        make:
+          type: string
+          title: Make
+        model:
+          type: string
+          title: Model
+        year:
+          type: integer
+          title: Year
+        sizes:
+          items:
+            "$ref": "#/components/schemas/SizeResponse"
+          type: array
+          title: Sizes
+      type: object
+      required:
+      - vehicle_id
+      - make
+      - model
+      - year
+      - sizes
+      title: VehicleSize
+    VendorCreate:
+      properties:
+        company_name:
+          type: string
+          title: Company Name
+        legal_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Legal Name
+        address:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Address
+        city:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: City
+        logo:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Logo
+        contact_email:
+          type: string
+          title: Contact Email
+        contact_phone:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Contact Phone
+        is_active:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Active
+          default: true
+        deleted_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Deleted At
+      type: object
+      required:
+      - company_name
+      - contact_email
+      title: VendorCreate
+    VendorRead:
+      properties:
+        vendor_id:
+          type: integer
+          title: Vendor Id
+        company_name:
+          type: string
+          title: Company Name
+        legal_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Legal Name
+        address:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Address
+        city:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: City
+        logo:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Logo
+        contact_email:
+          type: string
+          title: Contact Email
+        contact_phone:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Contact Phone
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        is_active:
+          type: boolean
+          title: Is Active
+          default: true
+        deleted_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Deleted At
+      type: object
+      required:
+      - vendor_id
+      - company_name
+      - contact_email
+      - created_at
+      title: VendorRead
+  securitySchemes:
+    OAuth2PasswordBearer:
+      type: oauth2
+      flows:
+        password:
+          scopes: {}
+          tokenUrl: token
